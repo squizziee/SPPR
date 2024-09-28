@@ -1,0 +1,54 @@
+﻿@page
+@model WEB_253504_LIANHA.Areas.Admin.Pages.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Automobile[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Automobile[0].Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Automobile[0].PriceInUsd)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Automobile[0].ImageUrl)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Automobile) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PriceInUsd)
+            </td>
+            <td>
+                <img src="@item.ImageUrl" alt="pic" style="width: 200px"/>
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
