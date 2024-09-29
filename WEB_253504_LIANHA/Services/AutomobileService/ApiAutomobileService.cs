@@ -1,4 +1,5 @@
-﻿using NuGet.Protocol;
+﻿using Microsoft.AspNetCore.Http;
+using NuGet.Protocol;
 using System.Text;
 using System.Text.Json;
 using WEB_253504_LIANHA.Domain.Entities;
@@ -9,6 +10,7 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 	public class ApiAutomobileService : IAutomobileService
 	{
 		private HttpClient _httpClient;
+		private IFileService _fileService;
 		private int _pageSize;
 		private IConfiguration _configuration;
 		private JsonSerializerOptions _serializerOptions;
@@ -16,9 +18,11 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		public ApiAutomobileService(HttpClient httpClient,
 			IConfiguration configuration,
-			ILogger<ApiAutomobileService> logger)
+			ILogger<ApiAutomobileService> logger, 
+			IFileService fileService)
 		{
 			_httpClient = httpClient;
+			_fileService = fileService;
 			_configuration = configuration;
 			_pageSize = configuration.GetValue<int>("ItemsPerPage");
 			_serializerOptions = new JsonSerializerOptions()
@@ -29,9 +33,20 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		}
 
-		public async Task<ResponseData<Automobile>> CreateAutomobileAsync(Automobile automobile)
+		public async Task<ResponseData<Automobile>> CreateAutomobileAsync(Automobile automobile, IFormFile? formFile)
 		{
-			var uri = new Uri(_httpClient.BaseAddress!.AbsoluteUri + "automobiles");
+            if (automobile.ImageUrl != null)
+            {
+                await _fileService.DeleteFileAsync(automobile.ImageUrl.Split("/").Last());
+                automobile.ImageUrl = null;
+            }
+            if (formFile != null)
+            {
+                var url = await SaveImageAsync(0, formFile!);
+                automobile.ImageUrl = url.Data;
+            }
+
+            var uri = new Uri(_httpClient.BaseAddress!.AbsoluteUri + "automobiles");
 			var response = await _httpClient.PostAsJsonAsync(uri, automobile, _serializerOptions);
 			if (response.IsSuccessStatusCode)
 			{
@@ -132,15 +147,28 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 			return ResponseData<ListModel<Automobile>>.Error($"Данные не получены от сервера. Error:{response.StatusCode}");
 		}
 
-		public Task<ResponseData<string>> SaveImageAsync(int id, IFormFile formFile)
+		public async Task<ResponseData<string>> SaveImageAsync(int id, IFormFile formFile)
 		{
-			throw new NotImplementedException();
-		}
+            var url = await _fileService.SaveFileAsync(formFile);
+			return ResponseData<string>.Success(url);
+        }
 
-		public async Task UpdateAutomobileAsync(int id, Automobile product, IFormFile? formFile)
+		public async Task UpdateAutomobileAsync(int id, Automobile automobile, IFormFile? formFile)
 		{
-			var urlString = new StringBuilder($"{_httpClient.BaseAddress!.AbsoluteUri}automobiles/" + id.ToString());
-			var response = await _httpClient.PutAsJsonAsync(new Uri(urlString.ToString()), product, _serializerOptions);
+            if (automobile.ImageUrl != null)
+            {
+                await _fileService.DeleteFileAsync(automobile.ImageUrl.Split("/").Last());
+                automobile.ImageUrl = null;
+            }
+			if (formFile != null)
+			{
+                var url = await SaveImageAsync(id, formFile!);
+				automobile.ImageUrl = url.Data;
+            }
+
+
+            var urlString = new StringBuilder($"{_httpClient.BaseAddress!.AbsoluteUri}automobiles/" + id.ToString());
+			var response = await _httpClient.PutAsJsonAsync(new Uri(urlString.ToString()), automobile, _serializerOptions);
 			if (response.IsSuccessStatusCode)
 			{
 				_logger.LogInformation($"-----> Info: {response.Content.ToJson()}");

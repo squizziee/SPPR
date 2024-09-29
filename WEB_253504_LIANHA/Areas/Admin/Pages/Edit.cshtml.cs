@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using WEB_253504_LIANHA.Domain.Entities;
+using WEB_253504_LIANHA.Services;
 using WEB_253504_LIANHA.Services.AutomobileService;
 
 namespace WEB_253504_LIANHA.Areas.Admin.Pages
@@ -9,14 +10,20 @@ namespace WEB_253504_LIANHA.Areas.Admin.Pages
     public class EditModel : PageModel
     {
         private readonly IAutomobileService _automobileService;
+        private readonly IFileService _fileService;
 
-        public EditModel(IAutomobileService automobileService)
+        public EditModel(IAutomobileService automobileService, IFileService fileService)
         {
             _automobileService = automobileService;
+            _fileService = fileService;
         }
 
         [BindProperty]
         public Automobile Automobile { get; set; } = default!;
+
+
+        [BindProperty]
+        public IFormFile UploadedFile { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -43,7 +50,7 @@ namespace WEB_253504_LIANHA.Areas.Admin.Pages
                 return Page();
             }
 
-            await _automobileService.UpdateAutomobileAsync(Automobile.Id, Automobile, null);
+            await _automobileService.UpdateAutomobileAsync(Automobile.Id, Automobile, UploadedFile);
 
             return RedirectToPage("./Index");
         }

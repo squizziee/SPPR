@@ -11,9 +11,10 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form method="post">
+        <form method="post"enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Automobile.Id" />
+            <input type="hidden" asp-for="Automobile.ImageUrl" />
             <div class="form-group">
                 <label asp-for="Automobile.Name" class="control-label"></label>
                 <input asp-for="Automobile.Name" class="form-control" />
@@ -35,9 +36,9 @@
                 <span asp-validation-for="Automobile.PriceInUsd" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Automobile.ImageUrl" class="control-label"></label>
-                <input asp-for="Automobile.ImageUrl" class="form-control" type="file" />
-                <span asp-validation-for="Automobile.ImageUrl" class="text-danger"></span>
+                <label asp-for="UploadedFile" class="control-label"></label>
+                <input asp-for="UploadedFile" class="form-control" type="file" />
+                <span asp-validation-for="UploadedFile" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

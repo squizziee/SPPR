@@ -5,18 +5,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using WEB_253504_LIANHA.API.Data;
+using WEB_253504_LIANHA.API.Services;
 using WEB_253504_LIANHA.Domain.Entities;
+using WEB_253504_LIANHA.Services.AutomobileService;
 
 namespace WEB_253504_LIANHA.Areas.Admin.Pages
 {
     public class DetailsModel : PageModel
     {
-        private readonly WEB_253504_LIANHA.API.Data.AppDbContext _context;
+        private readonly IAutomobileService _automobileService;
 
-        public DetailsModel(WEB_253504_LIANHA.API.Data.AppDbContext context)
+        public DetailsModel(IAutomobileService automobileService)
         {
-            _context = context;
+            _automobileService = automobileService;
         }
 
         public Automobile Automobile { get; set; } = default!;
@@ -28,7 +29,7 @@ namespace WEB_253504_LIANHA.Areas.Admin.Pages
                 return NotFound();
             }
 
-            var automobile = await _context.Automobiles.FirstOrDefaultAsync(m => m.Id == id);
+            var automobile = (await _automobileService.GetAutomobileByIdAsync(id ?? 0)).Data;
             if (automobile == null)
             {
                 return NotFound();
