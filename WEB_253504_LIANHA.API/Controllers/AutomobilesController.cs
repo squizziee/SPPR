@@ -4,6 +4,7 @@ using WEB_253504_LIANHA.Domain.Entities;
 using WEB_253504_LIANHA.Domain.Models;
 using WEB_253504_LIANHA.API.Services;
 using WEB_253504_LIANHA.API.Services.ProductService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WEB_253504_LIANHA.API.Controllers
 {
@@ -35,6 +36,7 @@ namespace WEB_253504_LIANHA.API.Controllers
         }
 
         // GET: api/Automobiles/5
+        [Authorize(Roles = "POWER_USER")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResponseData<Automobile>>> GetAutomobile(int id)
         {
@@ -44,6 +46,7 @@ namespace WEB_253504_LIANHA.API.Controllers
 
         // PUT: api/Automobiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAutomobile(int id, Automobile automobile)
         {
@@ -54,6 +57,7 @@ namespace WEB_253504_LIANHA.API.Controllers
 
         // POST: api/Automobiles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<ActionResult<Automobile>> PostAutomobile(Automobile automobile)
         {
@@ -63,6 +67,7 @@ namespace WEB_253504_LIANHA.API.Controllers
         }
 
         // DELETE: api/Automobiles/5
+        [Authorize(Roles = "admin")]
         [HttpDelete]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAutomobile(int id)
@@ -70,12 +75,6 @@ namespace WEB_253504_LIANHA.API.Controllers
             await _automobileService.DeleteAutomobileAsync(id);
 
             return NoContent();
-        }
-
-        private bool AutomobileExists(int id)
-        {
-            return false;
-            //return _context.Automobiles.Any(e => e.Id == id);
         }
     }
 }

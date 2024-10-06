@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using WEB_253504_LIANHA;
-using WEB_253504_LIANHA.API.Data;
 using WEB_253504_LIANHA.Extensions;
 using WEB_253504_LIANHA.Services;
 using WEB_253504_LIANHA.Services.AutomobileService;
@@ -16,12 +15,6 @@ var uriData = new UriData
 {
     ApiUri = builder.Configuration.GetSection("UriData").GetValue<string>("ApiUri")!
 };
-
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlite(builder.Configuration.GetConnectionString("Default"));
-});
 
 builder.Services.AddHttpClient<IFileService, ApiFileService>(opt => opt.BaseAddress = new Uri(uriData.ApiUri));
 

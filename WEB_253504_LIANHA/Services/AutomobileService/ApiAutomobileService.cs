@@ -9,12 +9,12 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 {
 	public class ApiAutomobileService : IAutomobileService
 	{
-		private HttpClient _httpClient;
-		private IFileService _fileService;
-		private int _pageSize;
-		private IConfiguration _configuration;
-		private JsonSerializerOptions _serializerOptions;
-		private ILogger<ApiAutomobileService> _logger;
+		private readonly HttpClient _httpClient;
+		private readonly IFileService _fileService;
+		private readonly int _pageSize;
+		private readonly IConfiguration _configuration;
+		private readonly JsonSerializerOptions _serializerOptions;
+		private readonly ILogger<ApiAutomobileService> _logger;
 
 		public ApiAutomobileService(HttpClient httpClient,
 			IConfiguration configuration,
@@ -35,16 +35,13 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		public async Task<ResponseData<Automobile>> CreateAutomobileAsync(Automobile automobile, IFormFile? formFile)
 		{
-            if (automobile.ImageUrl != null)
-            {
-                await _fileService.DeleteFileAsync(automobile.ImageUrl.Split("/").Last());
-                automobile.ImageUrl = null;
-            }
             if (formFile != null)
             {
                 var url = await SaveImageAsync(0, formFile!);
                 automobile.ImageUrl = url.Data;
             }
+
+			
 
             var uri = new Uri(_httpClient.BaseAddress!.AbsoluteUri + "automobiles");
 			var response = await _httpClient.PostAsJsonAsync(uri, automobile, _serializerOptions);
@@ -155,7 +152,7 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		public async Task UpdateAutomobileAsync(int id, Automobile automobile, IFormFile? formFile)
 		{
-            if (automobile.ImageUrl != null)
+            if (automobile.ImageUrl != null && formFile != null)
             {
                 await _fileService.DeleteFileAsync(automobile.ImageUrl.Split("/").Last());
                 automobile.ImageUrl = null;

@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WEB_253504_LIANHA.API\WEB_253504_LIANHA.API.csproj" />
     <ProjectReference Include="..\WEB_253504_LIANHA.Domain\WEB_253504_LIANHA.Domain.csproj" />
   </ItemGroup>
 

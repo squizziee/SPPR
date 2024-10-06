@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using WEB_253504_LIANHA.API.Services;
 using WEB_253504_LIANHA.Domain.Entities;
 using WEB_253504_LIANHA.Services.AutomobileService;
 
