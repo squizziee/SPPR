@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using WEB_253504_LIANHA.Domain.Entities;
 using WEB_253504_LIANHA.Domain.Models;
+using WEB_253504_LIANHA.Services.Authentication;
 
 namespace WEB_253504_LIANHA.Services.AutomobileService
 {
@@ -15,11 +16,13 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 		private readonly IConfiguration _configuration;
 		private readonly JsonSerializerOptions _serializerOptions;
 		private readonly ILogger<ApiAutomobileService> _logger;
+		private readonly ITokenAccessor _tokenAccessor;
 
 		public ApiAutomobileService(HttpClient httpClient,
 			IConfiguration configuration,
 			ILogger<ApiAutomobileService> logger, 
-			IFileService fileService)
+			IFileService fileService, 
+			ITokenAccessor tokenAcessor)
 		{
 			_httpClient = httpClient;
 			_fileService = fileService;
@@ -30,6 +33,7 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 				PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 			};
 			_logger = logger;
+			_tokenAccessor = tokenAcessor;
 
 		}
 
@@ -41,8 +45,7 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
                 automobile.ImageUrl = url.Data;
             }
 
-			
-
+			await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
             var uri = new Uri(_httpClient.BaseAddress!.AbsoluteUri + "automobiles");
 			var response = await _httpClient.PostAsJsonAsync(uri, automobile, _serializerOptions);
 			if (response.IsSuccessStatusCode)
@@ -56,7 +59,8 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		public async Task DeleteAutomobileAsync(int id)
 		{
-			var uri = new Uri(_httpClient.BaseAddress!.AbsoluteUri + "automobiles/" + id.ToString());
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            var uri = new Uri(_httpClient.BaseAddress!.AbsoluteUri + "automobiles/" + id.ToString());
 			var response = await _httpClient.DeleteAsync(uri);
 			if (response.IsSuccessStatusCode)
 			{
@@ -68,7 +72,8 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		public async Task<ResponseData<Automobile>> GetAutomobileByIdAsync(int id)
 		{
-			var urlString = new StringBuilder($"{_httpClient.BaseAddress!.AbsoluteUri}automobiles/");
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
+            var urlString = new StringBuilder($"{_httpClient.BaseAddress!.AbsoluteUri}automobiles/");
 			urlString.Append(id);
 			var response = await _httpClient.GetAsync(new Uri(urlString.ToString()));
 			if (response.IsSuccessStatusCode)
@@ -146,6 +151,7 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 
 		public async Task<ResponseData<string>> SaveImageAsync(int id, IFormFile formFile)
 		{
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
             var url = await _fileService.SaveFileAsync(formFile);
 			return ResponseData<string>.Success(url);
         }
@@ -163,7 +169,7 @@ namespace WEB_253504_LIANHA.Services.AutomobileService
 				automobile.ImageUrl = url.Data;
             }
 
-
+            await _tokenAccessor.SetAuthorizationHeaderAsync(_httpClient);
             var urlString = new StringBuilder($"{_httpClient.BaseAddress!.AbsoluteUri}automobiles/" + id.ToString());
 			var response = await _httpClient.PutAsJsonAsync(new Uri(urlString.ToString()), automobile, _serializerOptions);
 			if (response.IsSuccessStatusCode)

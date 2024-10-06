@@ -39,7 +39,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(opt =>
 {
-	opt.AddPolicy("admin", p => p.RequireRole("POWER-USER"));
+	opt.AddPolicy("admin", p => p.RequireRole("POWER_USER"));
 });
 
 var app = builder.Build();

@@ -46,7 +46,7 @@ namespace WEB_253504_LIANHA.API.Controllers
 
         // PUT: api/Automobiles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "POWER_USER")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAutomobile(int id, Automobile automobile)
         {
@@ -57,7 +57,7 @@ namespace WEB_253504_LIANHA.API.Controllers
 
         // POST: api/Automobiles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "POWER_USER")]
         [HttpPost]
         public async Task<ActionResult<Automobile>> PostAutomobile(Automobile automobile)
         {
@@ -67,7 +67,7 @@ namespace WEB_253504_LIANHA.API.Controllers
         }
 
         // DELETE: api/Automobiles/5
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = "POWER_USER")]
         [HttpDelete]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAutomobile(int id)
