@@ -36,7 +36,7 @@
         </li>
     </ul>
 </div>
-<div class="d-flex flex-wrap">
+@* <div class="d-flex flex-wrap">
 @foreach (var item in Model.Items) {
             <div class="card m-2" style="width: 18rem;">
             <div class="card-img-top" style="background-image: url('@(item.ImageUrl)'); background-position: center; background-size: cover; width: 100%; height: 200px"></div>
@@ -63,4 +63,11 @@
         
         <li class="page-item"><a class="page-link" asp-controller="Product" asp-action="Index" asp-route-pageno="@(Model.CurrentPage == Model.TotalPages - 1 ? Model.TotalPages - 1 : Model.CurrentPage + 1)">Next</a></li>
     </ul>
-</nav>
+</nav> *@
+<div id="partial_conatiner">
+    @await Html.PartialAsync("~/Views/Shared/Components/Product/_ProductListPartial.cshtml", Model)
+</div>
+
+@section Scripts {
+    <script src="/js/site.js"></script>
+}
