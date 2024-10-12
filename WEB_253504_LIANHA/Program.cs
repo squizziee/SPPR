@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Serilog;
 using WEB_253504_LIANHA;
 using WEB_253504_LIANHA.Extensions;
 using WEB_253504_LIANHA.HelperClasses;
+using WEB_253504_LIANHA.Middleware;
 using WEB_253504_LIANHA.Services;
 using WEB_253504_LIANHA.Services.Authentication;
 using WEB_253504_LIANHA.Services.AutomobileService;
@@ -11,6 +13,24 @@ using WEB_253504_LIANHA.Services.CategoryService;
 using WEB_253504_LIANHA.Services.SessionService;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//var configuration = new ConfigurationBuilder()
+//        .SetBasePath(Directory.GetCurrentDirectory())
+//        .AddJsonFile("appsettings.json")
+//        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
+//        .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddSerilog();
+
+builder.Host.UseSerilog();
+
+Log.Logger.Information("[Started logging...]");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -87,6 +107,8 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
+
+app.UseMiddleware<LoggingMiddleware>();
 
 app.UseSession();
 

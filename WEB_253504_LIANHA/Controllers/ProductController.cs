@@ -18,15 +18,16 @@ namespace WEB_253504_LIANHA.Controllers
             _categoryService = automobileCategoryService;
         }
 
-        [HttpGet("{category}")]
+        [HttpGet("{category?}")]
         public async Task<IActionResult> Index(string? category, int pageno = 0)
         {
+            var categories = (await _categoryService.GetAutomobileCategoryListAsync()).Data;
+
             var productResponse =
                 await _service.GetAutomobileListAsync(category, pageno);
-            if (!productResponse.Successful)
+            if (!productResponse.Successful || productResponse.Data == null)
                 return NotFound(productResponse.ErrorMessage);
 
-            var categories = (await _categoryService.GetAutomobileCategoryListAsync()).Data;
 
             ViewBag.CurrentCategory = categories!.Where(c => c.NormalizedName == category).FirstOrDefault();
             ViewBag.Categories = categories;
