@@ -8,6 +8,7 @@ using WEB_253504_LIANHA.Services;
 using WEB_253504_LIANHA.Services.Authentication;
 using WEB_253504_LIANHA.Services.AutomobileService;
 using WEB_253504_LIANHA.Services.CategoryService;
+using WEB_253504_LIANHA.Services.SessionService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,16 @@ var uriData = new UriData
 	ApiUri = builder.Configuration.GetSection("UriData").GetValue<string>("ApiUri")!
 };
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services
 	.AddHttpClient<IFileService, ApiFileService>(opt => opt.BaseAddress = new Uri(uriData.ApiUri));
 
@@ -29,9 +40,11 @@ builder.Services
 builder.Services
 	.AddHttpClient<IAutomobileCategoryService, ApiAutomobileCategoryService>(opt => opt.BaseAddress = new Uri(uriData.ApiUri));
 
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<ITokenAccessor, KeycloakTokenAccessor>();
+
+builder.Services.AddScoped<ISessionCartService, SessionCartService>();
+
+//builder.Services.AddHttpClient<ISessionCartService, SessionCartService>(opt => opt.BaseAddress = new Uri(uriData.ApiUri));
 
 builder.Services
     .AddHttpClient<IAuthService, KeycloakAuthService>(opt => opt.BaseAddress = new Uri(uriData.ApiUri));
@@ -74,6 +87,8 @@ if (!app.Environment.IsDevelopment())
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
+
+app.UseSession();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

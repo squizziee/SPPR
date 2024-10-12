@@ -12,8 +12,7 @@
                         <h5 class="card-title">@item.Name</h5>
                         <span class="badge bg-secondary">$@item.PriceInUsd</span>
                         <p class="card-text">@item.Description</p>
-                        <form asp-controller="Cart" asp-action="Add">
-                            <input type="hidden" name="productId" value="@item.Id"/>
+                        <form asp-controller="Cart" asp-action="Add" asp-route-id="@item.Id">
                             <input type="hidden" name="returnUrl" value="@(ViewContext.HttpContext.Request.Path + ViewContext.HttpContext.Request.QueryString.ToUriComponent())" />
                             <button type="submit" class="btn btn-primary">Add to cart</button>
                         </form>

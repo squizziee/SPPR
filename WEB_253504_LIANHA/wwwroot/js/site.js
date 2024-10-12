@@ -20,6 +20,6 @@ function setPagerListener() {
 			}
 		});
 
-		$(document).ajaxComplete(setPagerListener)
+		$(document). ajaxComplete(setPagerListener)
 	});
 }

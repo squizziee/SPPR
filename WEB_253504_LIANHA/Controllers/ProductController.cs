@@ -6,6 +6,7 @@ using WEB_253504_LIANHA.Extensions;
 
 namespace WEB_253504_LIANHA.Controllers
 {
+    [Route("catalog")]
     public class ProductController : Controller
     {
         private IAutomobileService _service;
@@ -17,6 +18,7 @@ namespace WEB_253504_LIANHA.Controllers
             _categoryService = automobileCategoryService;
         }
 
+        [HttpGet("{category}")]
         public async Task<IActionResult> Index(string? category, int pageno = 0)
         {
             var productResponse =

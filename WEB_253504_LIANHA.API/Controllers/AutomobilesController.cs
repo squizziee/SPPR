@@ -36,7 +36,7 @@ namespace WEB_253504_LIANHA.API.Controllers
         }
 
         // GET: api/Automobiles/5
-        [Authorize(Roles = "POWER_USER")]
+        // [Authorize(Roles = "POWER_USER")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ResponseData<Automobile>>> GetAutomobile(int id)
         {

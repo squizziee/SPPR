@@ -22,6 +22,8 @@
 		StringComparison.OrdinalIgnoreCase))?
 		.Value;
 
+	var cart = Context.Session.GetCart("cart");
+
 	var avatar = @User
 		.Claims
 		.FirstOrDefault(c => c.Type.Equals("avatar",
@@ -34,14 +36,17 @@
 		<a class="navbar-brand" href="#">WEB_25350078_LIANHA</a>
 		<div class="navbar-nav">
 			<a class="nav-item nav-link @(controller == "home" ? "active" : "")" asp-controller="Home" asp-action="Index">Лб 1</a>
-			<a class="nav-item nav-link @(controller == "product" ? "active" : "")" asp-controller="Product">Каталог</a>
-			<a class="nav-item nav-link @(area == "admin" ? "active" : "")" asp-area="Admin" asp-page="/Index">Администрирование</a>
+			<a class="nav-item nav-link @(controller == "product" ? "active" : "")" asp-controller="Product" asp-route-category="all">Каталог</a>
+			@if(User.IsInRole("POWER_USER"))
+			{
+				<a class="nav-item nav-link @(area == "admin" ? "active" : "")" asp-area="Admin" asp-page="/Index">Администрирование</a>
+			}
 		</div>
 
 		@if(isAuthenticated)
 		{
 			<a class="navbar-text ms-auto" asp-controller="Cart" asp-action="Index">
-				@await Component.InvokeAsync("CartComponent")
+				@await Component.InvokeAsync("CartComponent", cart)
 			</a>
 			<div class="dropdown ms-4 nav-color">
 				<button class="btn btn-secondary dropdown-toggle"

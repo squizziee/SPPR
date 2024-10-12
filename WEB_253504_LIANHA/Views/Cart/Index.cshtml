@@ -1,0 +1,57 @@
+﻿@model WEB_253504_LIANHA.Domain.Models.Cart
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<h1>Index</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Image
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CartItems[0].Automobile.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CartItems[0].Automobile.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CartItems[0].Automobile.PriceInUsd)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CartItems[0].Count)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.CartItems)
+        {
+            <tr>
+                <td>
+                    <img src="@item.Automobile.ImageUrl" alt="pic" style="width: 200px" />
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Automobile.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Automobile.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Automobile.PriceInUsd)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Count)
+                </td>
+                <td>
+                    <form asp-controller="cart" asp-action="delete" asp-route-id="@item.Automobile.Id">
+                        <input type="hidden" name="returnUrl" value="@(ViewContext.HttpContext.Request.Path + ViewContext.HttpContext.Request.QueryString.ToUriComponent())"/>
+                        <input type="submit" value="Delete"/>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
