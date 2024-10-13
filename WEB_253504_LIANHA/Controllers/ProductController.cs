@@ -3,6 +3,7 @@ using WEB_253504_LIANHA.Domain.Entities;
 using WEB_253504_LIANHA.Services.CategoryService;
 using WEB_253504_LIANHA.Services.AutomobileService;
 using WEB_253504_LIANHA.Extensions;
+using NuGet.Protocol;
 
 namespace WEB_253504_LIANHA.Controllers
 {
@@ -22,9 +23,13 @@ namespace WEB_253504_LIANHA.Controllers
         public async Task<IActionResult> Index(string? category, int pageno = 0)
         {
             var categories = (await _categoryService.GetAutomobileCategoryListAsync()).Data;
+            
+
 
             var productResponse =
                 await _service.GetAutomobileListAsync(category, pageno);
+
+            //return Ok(_service);
             if (!productResponse.Successful || productResponse.Data == null)
                 return NotFound(productResponse.ErrorMessage);
 

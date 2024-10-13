@@ -36,6 +36,8 @@ namespace WEB_253504_LIANHA.API.Services
 
 		public Task<ResponseData<ListModel<Automobile>>> GetAutomobileListAsync(string? categoryNormalizedName, int pageNo = 0, int pageSize = 3)
 		{
+			if (pageSize > 20) pageSize = 20;
+
 			List<Automobile> searchResult = [];
 
 			if (categoryNormalizedName is null)
@@ -44,17 +46,30 @@ namespace WEB_253504_LIANHA.API.Services
 			}
 			else
 			{
-				searchResult = _dbContext.Automobiles
-					.Where(a => _dbContext.AutomobileCategories
-					.Where(c => c.Id == a.CategoryId)
-					.First().NormalizedName == categoryNormalizedName)
-					.ToList();
-			}
+                //searchResult = _dbContext.Automobiles
+                //	.Where(a => _dbContext.AutomobileCategories
+                //	.Where(c => c.Id == a.CategoryId)
+                //	.First().NormalizedName == categoryNormalizedName)
+                //	.ToList();
+
+				var id = _dbContext.AutomobileCategories.Where(c => c.NormalizedName == categoryNormalizedName).First().Id;
+
+                searchResult = _dbContext.Automobiles
+                    .Where(a => a.CategoryId == id)
+                    .ToList();
+            }
 
 
 			int totalPages = searchResult.Count % pageSize == 0 ?
 				searchResult.Count / pageSize :
 				searchResult.Count / pageSize + 1;
+
+			if (pageNo > totalPages - 1)
+			{
+				return Task.FromResult(
+				ResponseData<ListModel<Automobile>>
+				.Error("No such page"));
+            }
 
 			return Task.FromResult(
 				ResponseData<ListModel<Automobile>>

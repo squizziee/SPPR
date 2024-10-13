@@ -7,6 +7,9 @@ using WEB_253504_LIANHA.Services.CategoryService;
 using WEB_253504_LIANHA.Controllers;
 using WEB_253504_LIANHA.Domain.Entities;
 using WEB_253504_LIANHA.Domain.Models;
+using Xunit.Abstractions;
+using Newtonsoft.Json.Linq;
+using Microsoft.Build.Framework;
 
 
 namespace WEB_253504_LIANHA.Tests.Controllers
@@ -17,9 +20,16 @@ namespace WEB_253504_LIANHA.Tests.Controllers
         private readonly IAutomobileCategoryService _categoryService = Substitute.For<IAutomobileCategoryService>();
         private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
 
+        private readonly ITestOutputHelper _output;
+
         private ProductController CreateController()
         {
             return new ProductController(_automobileService, _categoryService);
+        }
+
+        public ProductControllerTests(ITestOutputHelper output)
+        {
+            _output = output;
         }
 
         [Fact]
@@ -28,7 +38,12 @@ namespace WEB_253504_LIANHA.Tests.Controllers
             var controller = CreateController();
             _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Error("Не удалось загрузить категории")));
 
-            var result = await controller.Index(null);
+            var result = await controller.Index("all");
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var message = Assert.IsType<string>(okResult.Value);
+
+            _output.WriteLine($"The value is: {message}");
 
             //var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
             //Assert.Equal("Не удалось загрузить категории.", notFoundResult.Value);
