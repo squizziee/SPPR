@@ -29,7 +29,6 @@ namespace WEB_253504_LIANHA.Controllers
             var productResponse =
                 await _service.GetAutomobileListAsync(category, pageno);
 
-            //return Ok(_service);
             if (!productResponse.Successful || productResponse.Data == null)
                 return NotFound(productResponse.ErrorMessage);
 
@@ -41,7 +40,6 @@ namespace WEB_253504_LIANHA.Controllers
             {
                 return PartialView("~/Views/Shared/Components/Product/_ProductListPartial.cshtml", productResponse.Data);
             }
-
             return View(productResponse.Data!);
         }
     }

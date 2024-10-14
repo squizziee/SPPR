@@ -8,163 +8,123 @@ using WEB_253504_LIANHA.Controllers;
 using WEB_253504_LIANHA.Domain.Entities;
 using WEB_253504_LIANHA.Domain.Models;
 using Xunit.Abstractions;
-using Newtonsoft.Json.Linq;
-using Microsoft.Build.Framework;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using Microsoft.Extensions.FileProviders;
+using WEB_253504_LIANHA.Services;
+using WEB_253504_LIANHA.Services.Authentication;
 
 
 namespace WEB_253504_LIANHA.Tests.Controllers
 {
-    public class ProductControllerTests
-    {
-        private readonly IAutomobileService _automobileService = Substitute.For<IAutomobileService>();
-        private readonly IAutomobileCategoryService _categoryService = Substitute.For<IAutomobileCategoryService>();
-        private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
+	public class ProductControllerTests
+	{
+		ServiceCollection services = new ServiceCollection();
 
-        private readonly ITestOutputHelper _output;
+		private readonly IAutomobileService _automobileService; // = Substitute.For<IAutomobileService>();
+		private readonly IAutomobileCategoryService _categoryService; // = Substitute.For<IAutomobileCategoryService>();
+		private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
 
-        private ProductController CreateController()
-        {
-            return new ProductController(_automobileService, _categoryService);
-        }
+		private readonly ITestOutputHelper _output;
 
-        public ProductControllerTests(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+		private ProductController CreateController()
+		{
+			return new ProductController(_automobileService, _categoryService);
+		}
 
-        [Fact]
-        public async Task Index_ReturnsNotFound_WhenCategoriesNotLoaded()
-        {
-            var controller = CreateController();
-            _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Error("Не удалось загрузить категории")));
+		public ProductControllerTests(ITestOutputHelper output)
+		{
+			services.AddHttpClient<IAutomobileService, ApiAutomobileService>(client =>
+			{
+				client.BaseAddress = new Uri("https://localhost:7002/api/");
+			});
 
-            var result = await controller.Index("all");
+			services.AddHttpClient<IAutomobileCategoryService, ApiAutomobileCategoryService>(client =>
+			{
+				client.BaseAddress = new Uri("https://localhost:7002/api/");
+			});
 
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var message = Assert.IsType<string>(okResult.Value);
+			services.AddScoped<IFileService, ApiFileService>();
+			services.AddScoped<ITokenAccessor, KeycloakTokenAccessor>();
 
-            _output.WriteLine($"The value is: {message}");
+			services.AddHttpContextAccessor();
+			var inMemorySettings = new Dictionary<string, string> {
+				{"SomeSetting", "SomeValue"},
+				{"AnotherSetting", "AnotherValue"}
+			};
 
-            //var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            //Assert.Equal("Не удалось загрузить категории.", notFoundResult.Value);
-        }
-        [Fact]
-        public async Task Index_ReturnsNotFound_WhenMotorcyclesNotLoaded()
-        {
-            var controller = CreateController();
-            var category = "TestCategory";
-            _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Success(new List<AutomobileCategory> { new AutomobileCategory { Name = "TestCategory", NormalizedName = "TESTCATEGORY" } })));
-            _automobileService.GetAutomobileListAsync(category, 1).Returns(Task.FromResult(ResponseData<ListModel<Automobile>>.Error("Не удалось загрузить мотоциклы")));
+			IConfiguration configuration = new ConfigurationBuilder()
+				.AddInMemoryCollection(inMemorySettings!)
+				.Build();
 
-            var result = await controller.Index(category);
+			services.AddSingleton<IConfiguration>(configuration);
 
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("Не удалось загрузить мотоциклы", notFoundResult.Value);
-        }
-        [Fact]
-        public async Task Index_PopulatesViewDataWithCategories_WhenCategoriesAreSuccessfullyLoaded()
-        {
-            var controller = CreateController();
-            var httpContext = new DefaultHttpContext();
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContext
-            };
-            httpContext.Request.Headers["X-Requested-With"] = "";
+			_output = output;
 
-            var expectedCategories = new List<AutomobileCategory> {
-        new AutomobileCategory { Name = "Sport", NormalizedName = "SPORT" },
-        new AutomobileCategory { Name = "Touring", NormalizedName = "TOURING" }
-    };
-            _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Success(expectedCategories)));
-            _automobileService.GetAutomobileListAsync(null, 1).Returns(Task.FromResult(ResponseData<ListModel<Automobile>>.Success(new ListModel<Automobile>())));
+			var serviceProvider = services.BuildServiceProvider();
 
-            var result = await controller.Index(null);
+			_automobileService = serviceProvider.GetRequiredService<IAutomobileService>();
+			_categoryService = serviceProvider.GetRequiredService<IAutomobileCategoryService>();
+		}
 
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.NotNull(viewResult.ViewData["Categories"]);
-            var categoriesInViewData = viewResult.ViewData["Categories"] as List<AutomobileCategory>;
-            Assert.Equal(expectedCategories, categoriesInViewData);
-        }
-        [Fact]
-        public async Task Index_SetsCurrentCategoryToAll_WhenCategoryIsNull()
-        {
-            var controller = CreateController();
-            var httpContext = new DefaultHttpContext();
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContext
-            };
+		[Fact]
+		public async Task Index_ReturnsCorrecrCategory_WhenPassedCategory()
+		{
+			var controller = CreateController();
+			// _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Error("Не удалось загрузить категории")));
 
-            _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Success(new List<AutomobileCategory>())));
-            _automobileService.GetAutomobileListAsync(null, 1).Returns(Task.FromResult(ResponseData<ListModel<Automobile>>.Success(new ListModel<Automobile>())));
+			var result = await controller.Index("sedan");
 
-            var result = await controller.Index(null);
+			var okResult = Assert.IsType<ViewResult>(result);
+			//var message = Assert.IsType<string>(okResult.Value);
 
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal("Все Мотоциклы", viewResult.ViewData["CurrentCategory"]);
-        }
-        [Fact]
-        public async Task Index_SetsCurrentCategoryCorrectly_WhenCategoryIsSpecified()
-        {
-            var controller = CreateController();
-            var httpContext = new DefaultHttpContext();
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = httpContext
-            };
+			//_output.WriteLine($"The value is: {message}");
 
-            string category = "sport-bikes";
-            var categories = new List<AutomobileCategory>
-    {
-        new AutomobileCategory { Name = "Городские мотоциклы", NormalizedName = "urban-bikes" },
-        new AutomobileCategory { Name = "Спортивные мотоциклы", NormalizedName = "sport-bikes" },
-        new AutomobileCategory { Name = "Приключенческие мотоциклы", NormalizedName = "adventure-bikes" },
-        new AutomobileCategory { Name = "Классические мотоциклы", NormalizedName = "classic-bikes" },
-        new AutomobileCategory { Name = "Круизеры", NormalizedName = "cruiser-bikes" }
-    };
-            _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Success(categories)));
-            _automobileService.GetAutomobileListAsync(category, 1).Returns(Task.FromResult(ResponseData<ListModel<Automobile>>.Success(new ListModel<Automobile>())));
+			Assert.NotNull(okResult.ViewData["CurrentCategory"]);
+			Assert.Equal("sedan", (okResult.ViewData["CurrentCategory"] as AutomobileCategory)!.NormalizedName);
 
-            var result = await controller.Index(category);
+			//var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+			//Assert.Equal("Не удалось загрузить категории.", notFoundResult.Value);
+		}
+		[Fact]
+		public async Task Index_ReturnsAllCategories()
+		{
+			var controller = CreateController();
 
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal("Спортивные мотоциклы", viewResult.ViewData["CurrentCategory"]);
-        }
-        [Fact]
-        public async Task Index_ReturnsViewWithMotorcycleListModel_WhenDataIsSuccessfullyLoaded()
-        {
-            var controller = CreateController();
-            var httpContext = new DefaultHttpContext();
-            controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            };
+			var result = await controller.Index(null);
 
-            var category = "sport-bikes";
-            var categories = new List<AutomobileCategory>
-    {
-        new AutomobileCategory { Name = "Городские мотоциклы", NormalizedName = "urban-bikes" },
-        new AutomobileCategory { Name = "Спортивные мотоциклы", NormalizedName = "sport-bikes" },
-        new AutomobileCategory { Name = "Приключенческие мотоциклы", NormalizedName = "adventure-bikes" },
-        new AutomobileCategory { Name = "Классические мотоциклы", NormalizedName = "classic-bikes" },
-        new AutomobileCategory { Name = "Круизеры", NormalizedName = "cruiser-bikes" }
-    };
-            var expectedMotorcycles = new ListModel<Automobile>
-            {
-                Items = new List<Automobile> { new Automobile(), new Automobile(), new Automobile() },
-                CurrentPage = 1,
-                TotalPages = 2
-            };
+			var okResult = Assert.IsType<ViewResult>(result);
 
-            _categoryService.GetAutomobileCategoryListAsync().Returns(Task.FromResult(ResponseData<List<AutomobileCategory>>.Success(categories)));
-            _automobileService.GetAutomobileListAsync(category, 1).Returns(Task.FromResult(ResponseData<ListModel<Automobile>>.Success(expectedMotorcycles)));
+			var categoriesInViewData = okResult.ViewData["Categories"] as List<AutomobileCategory>;
+			Assert.NotNull(categoriesInViewData);
+			Assert.Equal(7, categoriesInViewData.Count);
+		}
 
-            var result = await controller.Index(category);
+		[Fact]
+		public async Task Index_ReturnsCorrectModel()
+		{
+			var controller = CreateController();
 
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsType<ListModel<Automobile>>(viewResult.Model);
-            Assert.Equal(expectedMotorcycles, model);
-        }
-    }
+			var result = await controller.Index(null);
+
+			var okResult = Assert.IsType<ViewResult>(result);
+
+			var model = okResult.Model as ListModel<Automobile>;
+			Assert.NotNull(model);
+			Assert.Equal(0, model.CurrentPage);
+			Assert.Equal(5, model.TotalPages);
+			Assert.Equal(3, model.Items.Count);
+
+		}
+
+		[Fact]
+		public async Task Index_ReturnsNotFound_WhenCategoryDoesNotExist()
+		{
+			var controller = CreateController();
+
+			var result = await controller.Index("nonexistantcategory");
+
+			var okResult = Assert.IsType<NotFoundObjectResult>(result);
+		}
+	}
 }

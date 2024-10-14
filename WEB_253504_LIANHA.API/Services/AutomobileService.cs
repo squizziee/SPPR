@@ -37,6 +37,7 @@ namespace WEB_253504_LIANHA.API.Services
 		public Task<ResponseData<ListModel<Automobile>>> GetAutomobileListAsync(string? categoryNormalizedName, int pageNo = 0, int pageSize = 3)
 		{
 			if (pageSize > 20) pageSize = 20;
+			if (pageSize <= 0) pageSize = 3;
 
 			List<Automobile> searchResult = [];
 

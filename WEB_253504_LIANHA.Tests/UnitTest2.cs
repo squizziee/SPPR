@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WEB_253504_LIANHA.API.Data;
 using WEB_253504_LIANHA.API.Services;
 using WEB_253504_LIANHA.Domain.Entities;

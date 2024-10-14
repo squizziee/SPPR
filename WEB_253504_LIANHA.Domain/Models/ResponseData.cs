@@ -25,5 +25,10 @@ namespace WEB_253504_LIANHA.Domain.Models
                 Data = data
             };
         }
+
+        public override string ToString()
+        {
+            return $"Success: {Successful}, Data: {Data}";
+        }
     }
 }
