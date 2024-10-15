@@ -1,0 +1,34 @@
+﻿@page "/automobilelist"
+@using Microsoft.AspNetCore.Authorization
+@using WEB_253504_LIANHA.Domain.Entities
+@attribute [Authorize]
+
+@if (@DataService.Automobiles == null || DataService.Categories == null)
+{
+	<span>Loading...</span>
+}
+else {
+	<CategorySelector DataService="DataService"/>
+	<AutomobileListBlock DataService="DataService" AutomobileSelected="SelectAutomobile"/>
+	<Pager DataService="DataService"/>
+	<AutomobileDetails Automobile="Automobile"></AutomobileDetails>
+}
+
+@code {
+	[Inject]
+	public IDataService DataService { get; set; }
+
+	public Automobile? Automobile { get; set; }
+
+	public void SelectAutomobile(Automobile automobile)
+	{
+		Automobile = automobile;
+		StateHasChanged();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await DataService.GetProductListAsync();
+		await DataService.GetCategoryListAsync();
+	}
+}

@@ -1,0 +1,20 @@
+﻿@using WEB_253504_LIANHA.Domain.Entities
+
+@if (Automobile != null)
+{
+    <div class="card" style="width: 100%;">
+        <img class="card-img-top" src="@(Automobile.ImageUrl)"/>
+        <div class="card-body">
+            <h5 class="card-title">@Automobile.Name</h5>
+            <span class="badge bg-secondary">$@Automobile.PriceInUsd</span>
+            <p class="card-text">@Automobile.Description</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Automobile? Automobile { get; set; }
+
+
+}

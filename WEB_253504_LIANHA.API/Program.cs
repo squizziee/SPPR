@@ -15,6 +15,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("https://localhost:7200", "https://localhost:7002")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials());
+});
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
 	options.UseSqlite(builder.Configuration.GetConnectionString("Default"));
@@ -52,6 +62,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // await DbInitializer.SeedData(app);
+app.UseCors("AllowSpecificOrigin");
 
 app.UseStaticFiles();
 

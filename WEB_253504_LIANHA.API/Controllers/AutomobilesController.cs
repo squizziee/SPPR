@@ -26,6 +26,7 @@ namespace WEB_253504_LIANHA.API.Controllers
         }
 
         // GET: api/Automobiles/categories
+        [Authorize]
         [HttpGet("categories/{category}")]
         public async Task<ActionResult<ResponseData<ListModel<Automobile>>>> GetAutomobiles(string? category, int pageNo = 0, int pageSize = 3)
         {
